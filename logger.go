@@ -46,9 +46,13 @@ func With(ctx context.Context, fields ...zap.Field) (context.Context, *zap.Logge
 }
 
 // Named appends a name to a Logger and re-injects it into a child Context
-func Named(ctx context.Context, name string) (context.Context, *zap.Logger) {
+func Named(ctx context.Context, name string, fields ...zap.Field) (context.Context, *zap.Logger) {
 	if logger, is := ctx.Value(contextKey).(*zap.Logger); is {
 		logger = logger.Named(name)
+
+		if len(fields) > 0 {
+			logger = logger.With(fields...)
+		}
 
 		return context.WithValue(ctx, contextKey, logger), logger
 	}
@@ -57,6 +61,11 @@ func Named(ctx context.Context, name string) (context.Context, *zap.Logger) {
 }
 
 // Info is a helper to log a single info-level message to a Context logger
-func Info(ctx context.Context, name, msg string, fields ...zap.Field) {
-	FromContext(ctx).Named(name).Info(msg, fields...)
+func Info(ctx context.Context, msg string, fields ...zap.Field) {
+	FromContext(ctx).Info(msg, fields...)
+}
+
+// Error is a helper to log a single error-level message to a Context logger
+func Error(ctx context.Context, msg string, fields ...zap.Field) {
+	FromContext(ctx).Error(msg, fields...)
 }
